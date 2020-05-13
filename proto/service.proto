@@ -1,0 +1,72 @@
+syntax = "proto3";
+package v1;
+
+import "google/protobuf/timestamp.proto";
+
+message ToDo{
+    int64 id =1;
+    string title =2;
+    string description=3;
+    google.protobuf.Timestamp insert_at = 4;
+}
+
+message NewToDo{
+    string title=1;
+    string description=2;
+}
+
+message createRequest{
+    string api=1;
+    NewToDo todo=2;
+}
+
+message updateRequest{
+    string api=1;
+    ToDo todo=2;
+}
+
+message deleteRequest{
+    string api=1;
+    int64 id=2;
+}
+
+message createResponse{
+    string api=1;
+    int64 id=2;
+}
+
+message updateResponse{
+    string api=1;
+    int64 id=2;
+}
+
+message deleteResponse{
+    string api=1;
+    int64 id=2;
+}
+
+message readRequest{
+    string api=1;
+    int64 id=2;
+}
+
+message readResponse{
+    string api=1;
+    ToDo todo=2;
+}
+
+message allRequest{
+    string api=1;
+}
+
+message allResponse{
+    string api=1;
+    repeated ToDo todos=2;
+}
+service ToDoListService{
+    rpc Create (createRequest) returns (createResponse);
+    rpc Update (updateRequest) returns (updateResponse);
+    rpc Delete (deleteRequest) returns (deleteResponse);
+    rpc Read (readRequest) returns (readResponse);
+    rpc ReadAll (allRequest) returns (allResponse);
+}
