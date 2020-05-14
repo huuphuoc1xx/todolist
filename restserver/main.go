@@ -1,14 +1,17 @@
 package main
+
 import (
-	"github.com/gin-gonic/gin""
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
-func main()  {
-	g:=gin.Default();
-	g.GET("/list-by-page",getListPaginate)
 
-	g.GET("/search-by-page",getListByTag)
+func main() {
+	g := gin.Default()
+	g.GET("/list-by-page")
 
-	g.POST("/new-task",createTask)
+	g.GET("/search-by-page", getListByTag)
+
+	g.POST("/new-task", createTask)
 
 	g.PUT("/")
 }
