@@ -9,7 +9,7 @@ import (
 
 func main() {
 	g := gin.Default()
-	g.GET("/list-by-page", controller.GetListToDo)
+	g.GET("/list-todo", controller.GetListToDo)
 	g.GET("/todo-by-id/:id", controller.GetToDo)
 
 	g.POST("/create-task", controller.CreateToDo)

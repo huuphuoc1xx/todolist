@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"todolist/config"
 
+	"todolist/database"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,9 +19,9 @@ func GetListToDo(ctx *gin.Context) {
 
 	tag := ctx.Query("tag")
 	if len(tag) == 0 {
-		tag = "*"
+		tag = "%"
 	}
-	todos := getTaskByPage(tag, page)
+	todos := database.GetTaskByPage(tag, page)
 	ctx.JSON(200, todos)
 }
 
@@ -27,7 +29,7 @@ func CreateToDo(ctx *gin.Context) {
 
 	var todo config.ToDo
 	ctx.BindJSON(&todo)
-	id := createTask(todo)
+	id := database.CreateTask(todo)
 	if id != 0 {
 		ctx.JSON(200, gin.H{"ID": id})
 	} else {
@@ -42,7 +44,7 @@ func GetToDo(ctx *gin.Context) {
 		return
 	}
 
-	todo := getTaskById(id)
+	todo := database.GetTaskById(id)
 	if todo == nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID"})
 		return
@@ -54,7 +56,7 @@ func UpdateToDo(ctx *gin.Context) {
 
 	var todo config.ToDo
 	ctx.BindJSON(&todo)
-	id := updateTask(todo)
+	id := database.UpdateTask(todo)
 	if id != 0 {
 		ctx.JSON(200, gin.H{"ID": id})
 	} else {
@@ -68,7 +70,7 @@ func DeleteToDo(ctx *gin.Context) {
 		ctx.JSON(404, gin.H{"error": "Invalid Id"})
 		return
 	}
-	id = deleteTask(id)
+	id = database.DeleteTask(id)
 	if id != 0 {
 		ctx.JSON(200, gin.H{"ID": id})
 	} else {

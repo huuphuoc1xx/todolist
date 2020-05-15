@@ -1,4 +1,4 @@
-package controller
+package database
 
 import (
 	"database/sql"
@@ -14,7 +14,9 @@ const (
 	Password = "32F8Gb0lfr"
 	url      = "remotemysql.com"
 	port     = "3306"
-	database = Username
+	database = "gsMg5DbNgQ"
+
+	pagesize = 2
 )
 
 var db = initDB()
@@ -29,8 +31,8 @@ func initDB() *sql.DB {
 	return db
 }
 
-func getTaskByPage(tag string, page int) []config.ToDo {
-	rows, err := db.Query("Select * from todolist where Tag=? limit 20 offset ?", tag, page-1)
+func GetTaskByPage(tag string, page int) []config.ToDo {
+	rows, err := db.Query("Select * from todolist where Tag like ? limit ? offset ?", tag, pagesize, (page-1)*pagesize)
 	if err != nil {
 		log.Fatal(err)
 		return nil
@@ -51,7 +53,7 @@ func getTaskByPage(tag string, page int) []config.ToDo {
 	return todos
 }
 
-func createTask(todo config.ToDo) int {
+func CreateTask(todo config.ToDo) int {
 	res, err := db.Exec("Insert into todolist(Username,Title,Tag,Description) value (?,?,?,?)", todo.Username, todo.Title, todo.Tag, todo.Description)
 	if err != nil {
 		log.Fatal(err)
@@ -65,22 +67,17 @@ func createTask(todo config.ToDo) int {
 	return int(id)
 }
 
-func updateTask(todo config.ToDo) int {
-	res, err := db.Exec("Update todolist Set Username=?, Title=?,Tag=?,Description=?where ID=?",
-		todo.Username, todo.Title, todo.Tag, todo.Description, todo.Id)
+func UpdateTask(todo config.ToDo) int {
+	res, err := db.Exec("Update todolist Set Title=?,Tag=?,Description=? where ID=?",
+		todo.Title, todo.Tag, todo.Description, todo.Id)
 	if err != nil {
 		log.Fatal(err)
 		return 0
 	}
-
-	if ra, err := res.RowsAffected(); ra == 0 || err != nil {
-		return 0
-	}
-	id, err := res.LastInsertId()
-	return int(id)
+	return todo.id
 }
 
-func getTaskById(id int) []config.ToDo {
+func GetTaskById(id int) []config.ToDo {
 	row := db.QueryRow("Select * from todolist where ID=?", id)
 
 	var todo config.ToDo
@@ -96,8 +93,8 @@ func getTaskById(id int) []config.ToDo {
 	return res
 }
 
-func deleteTask(id int) int {
-	res, err := db.Exec("Delete todolist where ID=?", id)
+func DeleteTask(id int) int {
+	res, err := db.Exec("Delete from todolist where ID=?", id)
 	if err != nil {
 		log.Fatal(err)
 		return 0
