@@ -43,7 +43,6 @@ message GetByIdRequest{
 }
 
 message GetByIdResponse{
-    int64 success=1;
     ToDo todo=2;
 }
 
