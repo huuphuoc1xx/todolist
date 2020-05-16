@@ -68,13 +68,13 @@ func CreateTask(todo config.ToDo) int {
 }
 
 func UpdateTask(todo config.ToDo) int {
-	res, err := db.Exec("Update todolist Set Title=?,Tag=?,Description=? where ID=?",
+	_, err := db.Exec("Update todolist Set Title=?,Tag=?,Description=? where ID=?",
 		todo.Title, todo.Tag, todo.Description, todo.Id)
 	if err != nil {
 		log.Fatal(err)
 		return 0
 	}
-	return todo.id
+	return todo.Id
 }
 
 func GetTaskById(id int) []config.ToDo {

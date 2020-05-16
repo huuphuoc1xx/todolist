@@ -1,0 +1,56 @@
+syntax="proto3";
+
+package proto;
+import "google/protobuf/timestamp.proto";
+
+message ToDo{
+    int64 Id=1;
+    string Username=2;
+    string Title=3;
+    string Tag=4;
+    string Description=5;
+    google.protobuf.Timestamp CreateTime=6;
+}
+
+message ToDoRequest{
+    ToDo todo=1;
+}
+
+message IdResponse{
+    int64 Id=1;
+}
+
+message DeleteRequest{
+    int64 Id=1;
+}
+
+message DeleteResponse{
+    int64 success=1;
+}
+
+message GetByTagRequest{
+    int64 page=1;
+    string tag=2;
+}
+
+message GetByTagResponse{
+    int64 count=1;
+    repeated ToDo todos=2;
+}
+
+message GetByIdRequest{
+    int64 Id=1;
+}
+
+message GetByIdResponse{
+    int64 success=1;
+    ToDo todo=2;
+}
+
+service ToDoService{
+    rpc Create (ToDoRequest) returns (IdResponse);
+    rpc Update (ToDoRequest) returns (IdResponse);
+    rpc Delete (DeleteRequest) returns (DeleteResponse);
+    rpc GetByTag (GetByTagRequest) returns (GetByTagResponse);
+    rpc GetById (GetByIdRequest) returns (GetByIdResponse);
+}
