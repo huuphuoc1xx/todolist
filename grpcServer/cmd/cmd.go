@@ -4,8 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"todolist/grpcserver/grpc"
-	server "todolist/grpcserver/server"
+	server "todolist/TodolistServer/server"
+	"todolist/grpcServer/grpc"
 )
 
 const (

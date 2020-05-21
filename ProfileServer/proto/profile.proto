@@ -1,0 +1,49 @@
+syntax="proto3";
+
+package profile;
+
+message Profile{
+    string Name=3;
+    string Email=4;
+    string Phone=5;
+}
+
+message LoginRequest{
+    string Username=1;
+    string Password=2;
+}
+
+message LoginResponse{
+    bool success=1;
+}
+
+message RegisterRequest{
+    string Username=1;
+    string Password=2;
+    Profile Profile=3; 
+}
+
+message RegisterResponse{
+    bool Success=1;
+}
+
+message UpdateRequest{
+    string Username=1;
+    string Password=2;
+    Profile Profile=3;
+}
+
+message UpdateResponse{
+    bool Success=1;
+}
+
+message GetProfileRequest{
+    string Username=1;
+}
+
+service ProfileService{
+    rpc Login (LoginRequest) returns (LoginResponse);
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Update (UpdateRequest) returns (UpdateResponse);
+    rpc GetProfile (GetProfileRequest) returns (Profile);
+}

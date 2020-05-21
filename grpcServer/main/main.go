@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"todolist/grpcserver/cmd"
+	"todolist/grpcServer/cmd"
 )
 
 func main() {

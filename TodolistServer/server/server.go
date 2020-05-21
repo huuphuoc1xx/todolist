@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"time"
-	proto "todolist/proto"
+	todoserver "todolist/TodolistServer/proto"
 
 	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/grpc/codes"
@@ -19,7 +19,7 @@ type toDoServiceServer struct {
 	db *sql.DB
 }
 
-func NewToDoServer(db *sql.DB) proto.ToDoServiceServer {
+func NewToDoServer(db *sql.DB) todoserver.ToDoServiceServer {
 	return &toDoServiceServer{db: db}
 }
 
@@ -27,7 +27,7 @@ func (s *toDoServiceServer) connect(ctx context.Context) (*sql.Conn, error) {
 	return s.db.Conn(ctx)
 }
 
-func (s *toDoServiceServer) GetByTag(ctx context.Context, req *proto.GetByTagRequest) (*proto.GetByTagResponse, error) {
+func (s *toDoServiceServer) GetByTag(ctx context.Context, req *todoserver.GetByTagRequest) (*todoserver.GetByTagResponse, error) {
 	c, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
@@ -37,9 +37,9 @@ func (s *toDoServiceServer) GetByTag(ctx context.Context, req *proto.GetByTagReq
 	if err != nil {
 		return nil, err
 	}
-	list := make([]*proto.ToDo, 0)
+	list := make([]*todoserver.ToDo, 0)
 	for rows.Next() {
-		todo := new(proto.ToDo)
+		todo := new(todoserver.ToDo)
 		var CreateTime string
 		if err := rows.Scan(&todo.Username, &todo.Id, &todo.Title, &todo.Tag, &todo.Description, &CreateTime); err != nil {
 			return nil, err
@@ -54,13 +54,13 @@ func (s *toDoServiceServer) GetByTag(ctx context.Context, req *proto.GetByTagReq
 		list = append(list, todo)
 	}
 
-	return &proto.GetByTagResponse{
+	return &todoserver.GetByTagResponse{
 		Count: int64(len(list)),
 		Todos: list,
 	}, nil
 }
 
-func (s *toDoServiceServer) Create(ctx context.Context, req *proto.ToDoRequest) (*proto.IdResponse, error) {
+func (s *toDoServiceServer) Create(ctx context.Context, req *todoserver.ToDoRequest) (*todoserver.IdResponse, error) {
 	c, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
@@ -74,10 +74,10 @@ func (s *toDoServiceServer) Create(ctx context.Context, req *proto.ToDoRequest) 
 	if err != nil {
 		return nil, err
 	}
-	return &proto.IdResponse{Id: id}, nil
+	return &todoserver.IdResponse{Id: id}, nil
 }
 
-func (s *toDoServiceServer) Update(ctx context.Context, req *proto.ToDoRequest) (*proto.IdResponse, error) {
+func (s *toDoServiceServer) Update(ctx context.Context, req *todoserver.ToDoRequest) (*todoserver.IdResponse, error) {
 	c, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
@@ -89,10 +89,10 @@ func (s *toDoServiceServer) Update(ctx context.Context, req *proto.ToDoRequest) 
 	if err != nil {
 		return nil, err
 	}
-	return &proto.IdResponse{Id: todo.GetId()}, nil
+	return &todoserver.IdResponse{Id: todo.GetId()}, nil
 }
 
-func (s *toDoServiceServer) GetById(ctx context.Context, req *proto.GetByIdRequest) (*proto.GetByIdResponse, error) {
+func (s *toDoServiceServer) GetById(ctx context.Context, req *todoserver.GetByIdRequest) (*todoserver.GetByIdResponse, error) {
 	c, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
@@ -100,7 +100,7 @@ func (s *toDoServiceServer) GetById(ctx context.Context, req *proto.GetByIdReque
 
 	row := c.QueryRowContext(ctx, "Select * from todolist where ID=?", req.GetId())
 
-	var todo proto.ToDo
+	var todo todoserver.ToDo
 	var CreateTime string
 	if err := row.Scan(&todo.Username, &todo.Id, &todo.Title, &todo.Tag, &todo.Description, &CreateTime); err != nil {
 		return nil, err
@@ -112,10 +112,10 @@ func (s *toDoServiceServer) GetById(ctx context.Context, req *proto.GetByIdReque
 	if err != nil {
 		return nil, status.Error(codes.Unknown, "CreateTime field has invalid format-> "+err.Error())
 	}
-	return &proto.GetByIdResponse{Todo: &todo}, nil
+	return &todoserver.GetByIdResponse{Todo: &todo}, nil
 }
 
-func (s *toDoServiceServer) Delete(ctx context.Context, req *proto.DeleteRequest) (*proto.DeleteResponse, error) {
+func (s *toDoServiceServer) Delete(ctx context.Context, req *todoserver.DeleteRequest) (*todoserver.DeleteResponse, error) {
 	c, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
@@ -127,7 +127,7 @@ func (s *toDoServiceServer) Delete(ctx context.Context, req *proto.DeleteRequest
 	}
 
 	if ra, err := res.RowsAffected(); ra == 0 || err != nil {
-		return &proto.DeleteResponse{Success: 0}, nil
+		return &todoserver.DeleteResponse{Success: 0}, nil
 	}
-	return &proto.DeleteResponse{Success: 1}, nil
+	return &todoserver.DeleteResponse{Success: 1}, nil
 }

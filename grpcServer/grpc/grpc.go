@@ -6,19 +6,19 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"todolist/proto"
+	todoserver "todolist/TodolistServer/proto"
 
 	"google.golang.org/grpc"
 )
 
-func RunServer(ctx context.Context, API proto.ToDoServiceServer, port string) error {
+func RunServer(ctx context.Context, API todoserver.ToDoServiceServer, port string) error {
 	listen, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		return err
 	}
 
 	server := grpc.NewServer()
-	proto.RegisterToDoServiceServer(server, API)
+	todoserver.RegisterToDoServiceServer(server, API)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {

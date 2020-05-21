@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"todolist/config"
 
-	"todolist/proto"
+	proto "todolist/TodolistServer/proto"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
