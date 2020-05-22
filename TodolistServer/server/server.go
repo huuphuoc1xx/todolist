@@ -33,7 +33,7 @@ func (s *toDoServiceServer) GetByTag(ctx context.Context, req *todoserver.GetByT
 		return nil, err
 	}
 
-	rows, err := c.QueryContext(ctx, "Select * from todolist where Tag like ? limit ? offset ?", req.GetTag(), pagesize, (req.GetPage()-1)*pagesize)
+	rows, err := c.QueryContext(ctx, "Select * from todolist where Tag like ? And Username=? limit ? offset ?", req.GetTag(), req.GetUsername(), pagesize, (req.GetPage()-1)*pagesize)
 	if err != nil {
 		return nil, err
 	}
@@ -84,8 +84,8 @@ func (s *toDoServiceServer) Update(ctx context.Context, req *todoserver.ToDoRequ
 	}
 
 	todo := req.GetTodo()
-	_, err = c.ExecContext(ctx, "Update todolist Set Title=?,Tag=?,Description=? where ID=?",
-		todo.GetTitle(), todo.GetTag(), todo.GetDescription(), todo.GetId())
+	_, err = c.ExecContext(ctx, "Update todolist Set Title=?,Tag=?,Description=? where ID=? And Username=?",
+		todo.GetTitle(), todo.GetTag(), todo.GetDescription(), todo.GetId(), todo.GetUsername())
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +98,7 @@ func (s *toDoServiceServer) GetById(ctx context.Context, req *todoserver.GetById
 		return nil, err
 	}
 
-	row := c.QueryRowContext(ctx, "Select * from todolist where ID=?", req.GetId())
+	row := c.QueryRowContext(ctx, "Select * from todolist where ID=? And Username=?", req.GetId(), req.GetUsername())
 
 	var todo todoserver.ToDo
 	var CreateTime string
@@ -121,7 +121,7 @@ func (s *toDoServiceServer) Delete(ctx context.Context, req *todoserver.DeleteRe
 		return nil, err
 	}
 
-	res, err := c.ExecContext(ctx, "Delete from todolist where ID=?", req.GetId)
+	res, err := c.ExecContext(ctx, "Delete from todolist where ID=? And Username=?", req.GetId(), req.GetUsername())
 	if err != nil {
 		return nil, err
 	}

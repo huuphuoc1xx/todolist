@@ -1,14 +1,10 @@
-package server
+package profileserver
 
 import (
 	"context"
 	"database/sql"
-	"time"
+	"fmt"
 	profile "todolist/ProfileServer/proto"
-
-	"github.com/golang/profilebuf/ptypes"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -34,13 +30,13 @@ func (s *profileServiceServer) Register(ctx context.Context, req *profile.Regist
 	}
 
 	info := req.GetProfile()
-	res, err := c.ExecContext(ctx, "Insert into profile(Username,Password,Name,Email,Phone) value (?,?,?,?)",
-		info.GetUsername(), info.GetPassword(), info.GetName(), info.GetEmail(), info.GetPhone())
+	_, err = c.ExecContext(ctx, "Insert into Profile(Username,Password,Name,Email,Phone) value (?,?,?,?,?)",
+		req.GetUsername(), req.GetPassword(), info.GetName(), info.GetEmail(), info.GetPhone())
 
 	if err != nil {
 		return &profile.RegisterResponse{Success: false}, err
 	}
-	return &profile.IdResponse{Success: true}, nil
+	return &profile.RegisterResponse{Success: true}, nil
 }
 
 func (s *profileServiceServer) Update(ctx context.Context, req *profile.UpdateRequest) (*profile.UpdateResponse, error) {
@@ -50,14 +46,14 @@ func (s *profileServiceServer) Update(ctx context.Context, req *profile.UpdateRe
 	}
 
 	info := req.GetProfile()
-	res, err := c.ExecContext(ctx, "Update profile Set Password=?, Name=?, Email=?,Phone=? where Username=?",
+	res, err := c.ExecContext(ctx, "Update Profile Set Password=?, Name=?, Email=?,Phone=? where Username=?",
 		req.GetPassword(), info.GetName(), info.GetEmail(), info.GetPhone(), req.GetUsername())
 
-	r := res.RowsAffected()
-	if err != nil {
-		return &profile.RegisterResponse{Success: false}, err
+	r, err := res.RowsAffected()
+	if r == 1 && err != nil {
+		return &profile.UpdateResponse{Success: false}, err
 	}
-	return &profile.IdResponse{Success: true}, nil
+	return &profile.UpdateResponse{Success: true}, nil
 }
 
 func (s *profileServiceServer) GetProfile(ctx context.Context, req *profile.GetProfileRequest) (*profile.Profile, error) {
@@ -66,36 +62,33 @@ func (s *profileServiceServer) GetProfile(ctx context.Context, req *profile.GetP
 		return nil, err
 	}
 
-	row := c.QueryRowContext(ctx, "Select Name,Email,Phone from Profile where Username=?", req.GetId())
+	row := c.QueryRowContext(ctx, "Select Name,Email,Phone from Profile where Username=?", req.GetUsername())
 
-	var todo profile.Profile
-	var CreateTime string
-	if err := row.Scan(&todo.Username, &todo.Id, &todo.Title, &todo.Tag, &todo.Description, &CreateTime); err != nil {
+	var result profile.Profile
+	if err := row.Scan(&result.Name, &result.Email, &result.Phone); err != nil {
 		return nil, err
 	}
 
-	formatTime := "2006-01-02 15:04:05"
-	createTime, _ := time.Parse(formatTime, CreateTime)
-	todo.CreateTime, err = ptypes.Timestampprofile(createTime)
-	if err != nil {
-		return nil, status.Error(codes.Unknown, "CreateTime field has invalid format-> "+err.Error())
-	}
-	return &profile.GetByIdResponse{Todo: &todo}, nil
+	return &result, nil
 }
 
-func (s *profileServiceServer) Delete(ctx context.Context, req *profile.DeleteRequest) (*profile.DeleteResponse, error) {
+func (s *profileServiceServer) Login(ctx context.Context, req *profile.LoginRequest) (*profile.LoginResponse, error) {
 	c, err := s.connect(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := c.ExecContext(ctx, "Delete from todolist where ID=?", req.GetId)
+	row := c.QueryRowContext(ctx, "Select Password from Profile where Username=?", req.GetUsername())
+
+	var Pass string
+	err = row.Scan(&Pass)
+
 	if err != nil {
-		return nil, err
+		return &profile.LoginResponse{Success: false}, err
 	}
 
-	if ra, err := res.RowsAffected(); ra == 0 || err != nil {
-		return &profile.DeleteResponse{Success: 0}, nil
+	if Pass != req.GetPassword() {
+		return &profile.LoginResponse{Success: false}, fmt.Errorf("Invalid Password")
 	}
-	return &profile.DeleteResponse{Success: 1}, nil
+	return &profile.LoginResponse{Success: true}, nil
 }

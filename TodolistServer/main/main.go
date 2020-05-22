@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"todolist/grpcServer/cmd"
+	"todolist/TodolistServer/cmd"
 )
 
 func main() {
@@ -11,4 +11,5 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
+
 }
