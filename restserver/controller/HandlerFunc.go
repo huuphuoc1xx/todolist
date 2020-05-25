@@ -190,7 +190,7 @@ func UpdateToDo(ctx *gin.Context) {
 
 	result, err := toDoClient.Update(ctx, &todoproto.ToDoRequest{
 		Todo: &todoproto.ToDo{
-			Id:          todo.Id,
+			Id:          int64(todo.Id),
 			Title:       todo.Title,
 			Tag:         todo.Tag,
 			Username:    uname,

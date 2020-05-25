@@ -26,21 +26,22 @@ func main() {
 	store := cookie.NewStore([]byte("secret"))
 	g.Use(sessions.Sessions("mysession", store))
 
-	g.POST("/login", controller.Login)
-	g.POST("/register", controller.Register)
+	g.POST("/user/login", controller.Login)
+	g.POST("/user/register", controller.Register)
+	g.GET("/user/logout", Authorize, controller.Logout)
 
-	r := g.Group("/")
+	r := g.Group("/user")
 	r.Use(Authorize)
-	{
-		r.GET("/logout", controller.Logout)
-		r.GET("/get-profile", controller.GetProfile)
-		r.GET("/list-todo", controller.GetListToDo)
-		r.GET("/todo-by-id/:id", controller.GetToDo)
-		r.POST("/create-task", controller.CreateToDo)
-		r.PUT("/update-task", controller.UpdateToDo)
-		r.DELETE("/delete-task/:id", controller.DeleteToDo)
-		r.PUT("/update-profile", controller.UpdateProfile)
-	}
+	r.GET("/", controller.GetProfile)
+	r.PUT("/", controller.UpdateProfile)
+
+	r2 := g.Group("/todo/")
+	r2.Use(Authorize)
+	r2.GET("/bytag", controller.GetListToDo)
+	r2.GET("/byid/:id", controller.GetToDo)
+	r2.POST("/", controller.CreateToDo)
+	r2.PUT("/", controller.UpdateToDo)
+	r2.DELETE("/", controller.DeleteToDo)
 
 	if err := g.Run(":8080"); err != nil {
 		log.Fatalf("failed to run server: %v", err)
